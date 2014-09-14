@@ -170,17 +170,14 @@ class ComputerPlayer
 
   attr_accessor :secret_word, :confused_speak, :name, :public_word
 
-  def initialize
+  def initialize(player_type)
     ask_for_name
     @confused_speak = ["Sorry, that makes no sense to me, but then I'm just a computer...",
                        "What the... I don't...",
-                       "You really don't understand this game do you?"
+                       "You really don't understand this game do you?",
                        "I'm going to go to bed now.  Why don't you go read a rule book?"]
-  end
-
-  def ask_for_name(player_type)
-    print "#{self.player_type}'s name:  "
-    @name = gets.chomp
+    @player_type = player_type
+    @name = "Robo"
   end
 
   def confused

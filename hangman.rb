@@ -108,3 +108,35 @@ ___|____"].reverse
 
 
 end
+
+class HumanPlayer
+
+  def initialize
+    @secret_word = nil
+  end
+
+  def take_a_guess
+  end
+
+  def handle(guess)
+  end
+
+  def pick_word
+  end
+end
+
+class ComputerPlayer
+
+  def initialize
+    @secret_word = nil
+  end
+
+  def take_a_guess
+  end
+
+  def handle(guess)
+  end
+
+  def pick_word
+  end
+end

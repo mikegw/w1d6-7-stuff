@@ -1,124 +1,3 @@
-class Hangman
-
-  PICS = ["
-    __
-   |  |
-   | _O_
-   |  |
-   | / \\
-___|____","
-    __
-   |  |
-   | _O_
-   |  |
-   |
-___|____","
-    __
-   |  |
-   | _O_
-   |
-   |
-___|____","
-    __
-   |  |
-   |  O
-   |
-   |
-___|____","
-    __
-   |  |
-   |
-   |
-   |
-___|____","
-
-   |
-   |
-   |
-   |
-___|____","
-
-
-
-
-
-___|____"]
-
-  attr_accessor :guesser, :word_chooser, :dictionary,
-                :public_word, :wrong_guesses_left
-
-  def initialize(guesser = nil, word_chooser = nil)
-    @public_word = nil
-    @guesser = guesser
-    @word_chooser = word_chooser
-    @dictionary
-    @wrong_guesses_left = PICS.length - 1
-    play
-  end
-
-  def play
-    game_start_display
-    ask_for_word
-    loop do
-      display_public_word
-      guess = guesser.take_a_guess
-      case word_chooser.handle(guess)
-        when :wrong_word
-          self.wrong_guesses_left = 0
-        when :wrong_letter
-          self.wrong_guesses_left -= 1
-      end
-      if game_over?
-        game_end_display
-        ask_new_game
-        break
-      end
-
-    end
-  end
-
-  def game_start_display
-    puts "\n\t\t\tHANGMAN!!
-    #{PICS.reverse.map{|pic| pic.split("\n")}.transpose.map{|line_arr| line_arr.map{|line| '%-9.9s' % line}.join}.join("\n")}"
-    puts "\n"
-  end
-
-
-  def ask_for_word
-    self.public_word = self.word_chooser.pick_word
-  end
-
-  def display_public_word
-    puts PICS[self.wrong_guesses_left]
-    puts "Secret word is: " + self.public_word
-  end
-
-  def game_over?
-    !self.word_chooser.public_word.include?("_") || wrong_guesses_left == 0
-  end
-
-  def game_end_display
-    if public_word.include?("_")
-      puts PICS.first
-      puts "Oh no, #{self.guesser.name} was hanged!"
-      puts "If only #{self.guesser.name} had known that the word was #{self.word_chooser.secret_word}"
-      puts "\nHard luck, #{self.guesser.name}, #{self.word_chooser.name} wins this time..."
-    else
-      puts "\nCongratulations, #{self.guesser.name}, you won!"
-    end
-  end
-
-
-  def ask_new_game
-    puts "\nWould you like to play again? (y/n)"
-    play_again = gets.chomp.downcase
-    Hangman.new(guesser, word_chooser) if play_again == "y"
-  end
-
-
-
-end
-
 class HumanPlayer
 
   attr_accessor :public_word, :player_type, :name, :confused_speak
@@ -168,7 +47,7 @@ end
 
 class ComputerPlayer
 
-  attr_accessor :secret_word, :confused_speak, :name, :public_word
+  attr_accessor :secret_word, :confused_speak, :name, :public_word, :dictionary
 
   def initialize(player_type)
     @confused_speak = ["Sorry, that makes no sense to me, but then I'm just a computer...",
@@ -177,6 +56,9 @@ class ComputerPlayer
                        "I'm going to go to bed now.  Why don't you go read a rule book?"]
     @player_type = player_type
     @name = "Robo"
+    @secret_word = nil
+    @public_word = nil
+    self.build_dictionary
   end
 
   def confused
@@ -188,16 +70,14 @@ class ComputerPlayer
       secret_word == guess ? public_word = guess : (return :wrong_word)
     end
 
-    if guess.length.between(2,guess.length)
+    if guess.length.between?(2,guess.length)
       return confused
     end
 
     if @secret_word.include?(guess)
-      public_word.each_char.with_index.map do |l,i|
-        guess == secret_word[i] ? l = guess : "_"
+      self.public_word.each_char.with_index.map do |l,i|
+        guess == @secret_word[i] ? l = guess : "_"
       end
-    end
-
     else
       return :wrong_letter
     end
@@ -207,6 +87,8 @@ class ComputerPlayer
 
   def build_dictionary
     self.dictionary = File.readlines("dictionary.txt")
+    puts self.dictionary
+  end
 
   def pick_word
     self.secret_word = self.dictionary.sample

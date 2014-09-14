@@ -100,6 +100,8 @@ ___|____"]
   def game_end_display
     if public_word.include?("_")
       puts PICS.first
+      puts "Oh no, #{self.guesser.name} was hanged!"
+      puts "If only #{self.guesser.name} had known that the word was #{self.word_chooser.secret_word}"
       puts "\nHard luck, #{self.guesser.name}, #{self.word_chooser.name} wins this time..."
     else
       puts "\nCongratulations, #{self.guesser.name}, you won!"
@@ -166,8 +168,9 @@ end
 
 class ComputerPlayer
 
+  attr_accessor :secret_word, :confused_speak, :name, :public_word
+
   def initialize
-    @secret_word = nil
     ask_for_name
     @confused_speak = ["Sorry, that makes no sense to me, but then I'm just a computer...",
                        "What the... I don't...",
@@ -175,10 +178,9 @@ class ComputerPlayer
                        "I'm going to go to bed now.  Why don't you go read a rule book?"]
   end
 
-  def ask_for_name
-    print "Guessers name:  "
-    @name = gets
-    puts @name
+  def ask_for_name(player_type)
+    print "#{self.player_type}'s name:  "
+    @name = gets.chomp
   end
 
   def confused
@@ -206,6 +208,9 @@ class ComputerPlayer
 
     :handled
   end
+
+  def build_dictionary
+    self.dictionary = File.readlines("dictionary.txt")
 
   def pick_word
     self.secret_word = self.dictionary.sample

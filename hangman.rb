@@ -171,7 +171,6 @@ class ComputerPlayer
   attr_accessor :secret_word, :confused_speak, :name, :public_word
 
   def initialize(player_type)
-    ask_for_name
     @confused_speak = ["Sorry, that makes no sense to me, but then I'm just a computer...",
                        "What the... I don't...",
                        "You really don't understand this game do you?",

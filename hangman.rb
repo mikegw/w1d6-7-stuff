@@ -61,8 +61,10 @@ ___|____"].reverse
     loop do
       display_public_word
       guess = guesser.take_a_guess
-
-      word_chooser.handle(guess)
+      case word_chooser.handle(guess)
+        wrong_guesses_left = 0 when :wrong_word
+        wrong_guesses_left -= 1 when :wrong_letter
+      end
       if game_over?
         ask_new_game
         break
@@ -101,7 +103,7 @@ ___|____"].reverse
 
   def ask_new_game
     puts "Would you like to play again? (y/n)"
-    play_again? = gets
+    play_again = gets.chomp.downcase
     Hangman.new(guesser, word_chooser) if play_again == y
   end
 
@@ -111,17 +113,46 @@ end
 
 class HumanPlayer
 
-  def initialize
-    @secret_word = nil
+  def initialize(player_type)
+    @public_word = nil
+    ask_for_name
+    @player_type
+  end
+
+  def ask_for_name
+    print "#{self.player_type}'s name:  "
+    @name = gets.chomp
   end
 
   def take_a_guess
+    "{self.name.capitalize}, take a guess: #{gets.chomp}"
   end
 
   def handle(guess)
+    if guess.length > 1
+      print "{self.name.capitalize}, is #{guess} your word?(y/n): "
+      gets.chomp.downcase == "y" ? public_word = guess : return :wrong_word
+    end
+
+    print "{self.name.capitalize}, is #{guess} in your word? (y/n): "
+    if gets.chomp.downcase == "y"
+      print "where?: "
+      positions = gets.chomp.downcase.split(" ")
+
+      positions.each do |i|
+        self.public_word[i] = guess
+      end
+
+    else
+      return :wrong_letter
+    end
+
+    :handled
   end
 
   def pick_word
+    print "#{self.name.capitalize}, how long is your word?"
+    self.public_word = "_" * gets.to_i
   end
 end
 
@@ -129,14 +160,23 @@ class ComputerPlayer
 
   def initialize
     @secret_word = nil
+    ask_for_name
   end
 
+  def ask_for_name
+    print "Guessers name:  "
+    @name = gets
+    puts @name
+  end
   def take_a_guess
+    puts ""
+    gets
   end
 
   def handle(guess)
   end
 
   def pick_word
+
   end
 end

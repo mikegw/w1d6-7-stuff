@@ -30,16 +30,20 @@ class Wordchainer
     until self.current_words.empty?
       new_current_words = []
       @current_words.each do|word|
-        adjacent_words(word, dict).each do |new_word|
-          next if self.all_seen_words.include?(new_word)
-          new_current_words << new_word
-          self.all_seen_words << new_word
-        end
+        explore_current_words(word,dict,new_current_words)
       end
       p self.current_words
       self.current_words = new_current_words
     end
     self.all_seen_words = []
+  end
+
+  def explore_current_words(word,dict,new_current_words)
+    adjacent_words(word, dict).each do |new_word|
+      next if self.all_seen_words.include?(new_word)
+      new_current_words << new_word
+      self.all_seen_words << new_word
+    end
   end
 
 end

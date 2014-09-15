@@ -30,20 +30,32 @@ class Wordchainer
     until self.current_words.empty?
       new_current_words = []
       @current_words.each do|word|
-        explore_current_words(word,dict,new_current_words)
+        explore_current_words(word,dict,new_current_words,target)
       end
-      self.current_words.each {|w| puts "#{w} came from #{self.all_seen_words[w]}"}
+      #self.current_words.each {|w| puts "#{w} came from #{self.all_seen_words[w]}"}
       self.current_words = new_current_words
     end
+    build_path(target)
     self.all_seen_words = []
   end
 
-  def explore_current_words(word,dict,new_current_words)
+  def explore_current_words(word,dict,new_current_words,target)
     adjacent_words(word, dict).each do |new_word|
-      next if self.all_seen_words.include?(new_word)
+      next if self.all_seen_words.has_key?(new_word)
       new_current_words << new_word
       self.all_seen_words[new_word] = word
+      build_path(target) if word == target
     end
+  end
+
+  def build_path(target)
+    path = [target]
+    until self.all_seen_words[target] == nil
+      target = self.all_seen_words[target]
+      path << target
+    end
+    p path.reverse
+    exit
   end
 
 end
@@ -51,4 +63,4 @@ end
 w = Wordchainer.new('dictionary.txt')
 #p w.adjacent_words('angle')
 
-w.run('market', 'bat')
+w.run('misty', 'bland')

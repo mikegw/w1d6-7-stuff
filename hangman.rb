@@ -39,6 +39,10 @@ class HumanPlayer
     :handled
   end
 
+  def wrong_guess(guess)
+    puts ["Nope!", "I'm afraid not!","Nope!", "I'm afraid not!", "Sorry!" "Ooh that was close", "You're going to hang for that!"].sample
+  end
+
   def pick_word
     print "#{self.name.capitalize}, how long is your word?"
     self.public_word = "_" * gets.to_i
@@ -46,23 +50,27 @@ class HumanPlayer
 end
 
 class ComputerPlayer
+  @@count = 0
 
-  attr_accessor :secret_word, :confused_speak, :name, :public_word, :dictionary
+  attr_accessor :secret_word, :confused_speak, :name, :public_word, :dictionary, :letters_to_guess
 
   def initialize(player_type)
+    @@count += 1
     @confused_speak = ["Sorry, that makes no sense to me, but then I'm just a computer...",
                        "What the... I don't...",
                        "You really don't understand this game do you?",
                        "I'm going to go to bed now.  Why don't you go read a rule book?"]
     @player_type = player_type
-    @name = "Robo"
+    @name = "Robo" + @@count.to_s
     @secret_word = nil
     @public_word = nil
     self.build_dictionary
+    self.letters_to_guess = ('a'..'z').to_a
   end
 
   def confused
-    confused_speak.empty? ? :wrong_word : confused[0].shift
+    confused_speak.empty? ? (return :wrong_word) : (puts confused_speak.shift)
+    :wrong_letter
   end
 
   def handle(guess)
@@ -75,8 +83,8 @@ class ComputerPlayer
     end
 
     if @secret_word.include?(guess)
-      self.public_word.each_char.with_index.map do |l,i|
-        guess == @secret_word[i] ? l = guess : "_"
+      self.public_word.length.times do |i|
+        self.public_word[i] = guess if guess == @secret_word[i]
       end
     else
       return :wrong_letter
@@ -87,11 +95,27 @@ class ComputerPlayer
 
   def build_dictionary
     self.dictionary = File.readlines("dictionary.txt")
-    puts self.dictionary
   end
 
   def pick_word
     self.secret_word = self.dictionary.sample
-    self.public_word = '_' * self.secret_word.length
+    self.public_word = '_' * (self.secret_word.length-1)
+  end
+
+  def take_a_guess
+    letter_set = Hash.new{|h,k| h[k] = 0}
+    dictionary.join.each_char do |l|
+      letter_set[l] += 1
+    end
+    guess = letters_to_guess.sort{|a,b| letter_set[b] <=> letter_set[a]}[0..(letters_to_guess.size/5)].sample
+    letters_to_guess.delete(guess)
+    puts guess
+    guess
+
+  end
+
+  def wrong_guess(guess)
+    puts ["Nope!", "I'm afraid not!","Nope!", "I'm afraid not!", "Sorry!" "Ooh that was close", "You're going to hang for that!"].sample
+    self.dictionary.reject{|word| word.chars.include?(guess)}
   end
 end

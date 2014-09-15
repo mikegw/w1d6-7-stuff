@@ -4,7 +4,7 @@ class Wordchainer
 
   def initialize(dictionary_file)
     @dictionary = File.readlines(dictionary_file).map(&:chomp)
-    @all_seen_words = []
+    @all_seen_words = Hash.new()
     @current_words = []
   end
 
@@ -25,14 +25,14 @@ class Wordchainer
 
   def run(source, target)
     dict = @dictionary.keep_if{|w| w.length == source.length }
-    self.all_seen_words << source
+    self.all_seen_words[source] = nil
     self.current_words << source
     until self.current_words.empty?
       new_current_words = []
       @current_words.each do|word|
         explore_current_words(word,dict,new_current_words)
       end
-      p self.current_words
+      self.current_words.each {|w| puts "#{w} came from #{self.all_seen_words[w]}"}
       self.current_words = new_current_words
     end
     self.all_seen_words = []
@@ -42,7 +42,7 @@ class Wordchainer
     adjacent_words(word, dict).each do |new_word|
       next if self.all_seen_words.include?(new_word)
       new_current_words << new_word
-      self.all_seen_words << new_word
+      self.all_seen_words[new_word] = word
     end
   end
 
@@ -51,4 +51,4 @@ end
 w = Wordchainer.new('dictionary.txt')
 #p w.adjacent_words('angle')
 
-w.run('cat', 'bat')
+w.run('market', 'bat')
